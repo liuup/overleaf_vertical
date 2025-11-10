@@ -1,0 +1,16 @@
+{
+  "manifest_version": 3,
+  "name": "Overleaf Vertical Split",
+  "version": "1.0",
+  "description": "Force Overleaf editor and preview to display top-bottom instead of side-by-side.",
+  "icons": {
+    "48": "./icon.png"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://www.overleaf.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
