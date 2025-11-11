@@ -15,7 +15,7 @@ Requirements: Chromium-based browser(Like Chrome)
 
 3. Download the extension from release, and unzip the file.
 
-4. Drag rhe dictionary to the extension space.
+4. Drag the dictionary to the extension space.
 
 <p align="center">
   <img src="./images/figure7.png" width="500">
