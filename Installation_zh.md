@@ -13,7 +13,7 @@
   <img src="./images/figure6.png" width="500">
 </p>
 
-3. 从 Release 页面下载源代码, 然后解压
+3. 从 [Release](https://github.com/liuup/overleaf_vertical/releases) 页面下载源代码, 然后解压
 
 4. 直接把解压后的文件拖到插件页面
 

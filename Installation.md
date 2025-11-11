@@ -13,7 +13,7 @@ Requirements: Chromium-based browser(Like Chrome)
   <img src="./images/figure6.png" width="500">
 </p>
 
-3. Download the extension from release, and unzip the file.
+3. Download the extension from [Release](https://github.com/liuup/overleaf_vertical/releases), and unzip the file.
 
 4. Drag the dictionary to the extension space.
 
