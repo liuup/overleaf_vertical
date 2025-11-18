@@ -1,25 +1,28 @@
-// Default domain that cannot be removed
-const DEFAULT_DOMAIN = "*://www.overleaf.com/*";
+// Default domains that cannot be removed
+const DEFAULT_DOMAINS = ["*://www.overleaf.com/*", "*://cn.overleaf.com/*"];
 
 // Load and display domains
 async function loadDomains() {
   const result = await chrome.storage.sync.get({ customDomains: [] });
-  const domains = [DEFAULT_DOMAIN, ...result.customDomains];
-  
+  const domains = [...DEFAULT_DOMAINS, ...result.customDomains];
+
   const domainList = document.getElementById('domainList');
   domainList.innerHTML = '';
-  
+
   domains.forEach((domain, index) => {
-    const isDefault = domain === DEFAULT_DOMAIN;
+    const isDefault = DEFAULT_DOMAINS.includes(domain);
     const item = document.createElement('div');
     item.className = `domain-item ${isDefault ? 'default' : ''}`;
-    
+
+    // Calculate the correct index in customDomains array
+    const customIndex = index - DEFAULT_DOMAINS.length;
+
     item.innerHTML = `
       ${isDefault ? '<span class="domain-badge">Default</span>' : ''}
       <span class="domain-text">${escapeHtml(domain)}</span>
-      ${!isDefault ? `<button class="remove-btn" data-index="${index - 1}">Remove</button>` : ''}
+      ${!isDefault ? `<button class="remove-btn" data-index="${customIndex}">Remove</button>` : ''}
     `;
-    
+
     domainList.appendChild(item);
   });
   
@@ -52,7 +55,7 @@ async function addDomain() {
   const customDomains = result.customDomains;
   
   // Check if domain already exists
-  if (customDomains.includes(domain) || domain === DEFAULT_DOMAIN) {
+  if (customDomains.includes(domain) || DEFAULT_DOMAINS.includes(domain)) {
     showMessage('This domain pattern already exists', 'error');
     return;
   }
@@ -85,25 +88,30 @@ async function removeDomain(index) {
 }
 
 // Update content scripts dynamically
+// Note: Default domains are handled by static content_scripts in manifest.json
+// This only updates custom domains
 async function updateContentScripts(customDomains) {
-  // Note: Manifest V3 doesn't allow dynamic content script registration in the same way as V2
-  // We'll use chrome.scripting API to register content scripts
   try {
-    const allDomains = [DEFAULT_DOMAIN, ...customDomains];
-    
-    // Unregister existing dynamic scripts
-    const existingScripts = await chrome.scripting.getRegisteredContentScripts();
-    if (existingScripts.length > 0) {
-      await chrome.scripting.unregisterContentScripts();
+    // Unregister all existing dynamic content scripts
+    try {
+      const existingScripts = await chrome.scripting.getRegisteredContentScripts();
+      if (existingScripts.length > 0) {
+        const ids = existingScripts.map(script => script.id);
+        await chrome.scripting.unregisterContentScripts({ ids });
+      }
+    } catch (error) {
+      // Ignore errors if no scripts are registered
     }
-    
-    // Register new script with updated matches
-    await chrome.scripting.registerContentScripts([{
-      id: "overleaf-vertical",
-      matches: allDomains,
-      js: ["content.js"],
-      runAt: "document_idle"
-    }]);
+
+    // Only register if there are custom domains
+    if (customDomains && customDomains.length > 0) {
+      await chrome.scripting.registerContentScripts([{
+        id: "overleaf-vertical-custom",
+        matches: customDomains,
+        js: ["content.js"],
+        runAt: "document_idle"
+      }]);
+    }
   } catch (error) {
     console.error('Error updating content scripts:', error);
   }
@@ -138,4 +146,3 @@ document.getElementById('newDomain').addEventListener('keypress', (e) => {
 
 // Load domains on page load
 loadDomains();
-

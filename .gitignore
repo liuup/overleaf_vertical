@@ -2,6 +2,7 @@
 build/
 dist/
 *.zip
+*.tar.gz
 
 # OS files
 .DS_Store
@@ -23,4 +24,3 @@ desktop.ini
 node_modules/
 package-lock.json
 yarn.lock
-

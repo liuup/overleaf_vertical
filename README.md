@@ -40,7 +40,7 @@ When in vertical mode, you can drag the divider between the editor and PDF previ
 ## Multi-Domain Support
 The extension works with:
 - www.overleaf.com (default)
-- cn.overleaf.com (Chinese version)
+- cn.overleaf.com (default, Chinese version)
 - Self-hosted Overleaf instances
 
 To add custom domains (one at a time):

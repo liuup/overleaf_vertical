@@ -37,19 +37,18 @@ jobs:
         echo "Extension version: $VERSION"
         
     - name: Create ZIP archive
-      if: startsWith(github.ref, 'refs/tags/v')
       run: |
         cd build
         zip -r ../overleaf-vertical-v${{ steps.get_version.outputs.version }}.zip .
         cd ..
-
-    - name: Upload build artifact
+        
+    - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
         name: overleaf-vertical-v${{ steps.get_version.outputs.version }}
-        path: build/*
+        path: overleaf-vertical-v${{ steps.get_version.outputs.version }}.zip
         retention-days: 90
-
+        
     - name: Create Release
       if: startsWith(github.ref, 'refs/tags/v')
       uses: softprops/action-gh-release@v1

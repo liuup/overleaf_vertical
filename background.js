@@ -1,14 +1,14 @@
 // Background service worker for managing dynamic content scripts
-
-const DEFAULT_DOMAIN = "*://www.overleaf.com/*";
+// Note: Default domains (www.overleaf.com, cn.overleaf.com) are handled by static content_scripts in manifest.json
+// This only manages additional custom domains added by users
 
 // Initialize on installation
 chrome.runtime.onInstalled.addListener(async (details) => {
   if (details.reason === 'install' || details.reason === 'update') {
     // Initialize storage with empty custom domains if not exists
     const result = await chrome.storage.sync.get({ customDomains: [] });
-    
-    // Register content scripts with all domains
+
+    // Register content scripts for custom domains only
     await updateContentScripts(result.customDomains);
   }
 });
@@ -21,11 +21,10 @@ chrome.storage.onChanged.addListener(async (changes, areaName) => {
   }
 });
 
-// Update content scripts with current domains
+// Update content scripts with custom domains only
+// Default domains are already handled by manifest.json
 async function updateContentScripts(customDomains) {
   try {
-    const allDomains = [DEFAULT_DOMAIN, ...customDomains];
-    
     // Unregister all existing dynamic content scripts
     try {
       const existingScripts = await chrome.scripting.getRegisteredContentScripts();
@@ -35,20 +34,18 @@ async function updateContentScripts(customDomains) {
       }
     } catch (error) {
       // Ignore errors if no scripts are registered
-      console.log('No existing scripts to unregister');
     }
-    
-    // Register new content script with all domains
-    await chrome.scripting.registerContentScripts([{
-      id: "overleaf-vertical-dynamic",
-      matches: allDomains,
-      js: ["content.js"],
-      runAt: "document_idle"
-    }]);
-    
-    console.log('Content scripts updated for domains:', allDomains);
+
+    // Only register if there are custom domains
+    if (customDomains && customDomains.length > 0) {
+      await chrome.scripting.registerContentScripts([{
+        id: "overleaf-vertical-custom",
+        matches: customDomains,
+        js: ["content.js"],
+        runAt: "document_idle"
+      }]);
+    }
   } catch (error) {
     console.error('Error updating content scripts:', error);
   }
 }
-
