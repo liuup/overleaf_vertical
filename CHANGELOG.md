@@ -2,7 +2,7 @@
 
 All notable changes to the Overleaf Vertical extension will be documented in this file.
 
-## [1.1.0] - 2025-11-18
+## [1.1.1] - 2025-11-18
 
 ### Features
 - **Resizable Divider**: The vertical divider between editor and PDF preview is draggable. Users can click and drag to adjust the split ratio to their preference.
