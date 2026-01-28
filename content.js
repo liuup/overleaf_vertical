@@ -5,22 +5,60 @@ let currentContainer = null;
 let isVerticalMode = false;
 
 function setVerticalLayout() {
-  let container = document.querySelector('#panel-main > div[data-panel-group-id]');
-  if (!container) return;
+  // 找到包含编辑器和PDF的容器 - 使用更精确的选择器
+  let container = document.querySelector('#ide-redesign-editor-and-pdf-panel [data-panel-group][data-panel-group-direction="horizontal"]');
+  if (!container) {
+    // 备用选择器
+    container = document.querySelector('div[data-panel-group][data-panel-group-id]');
+  }
+  if (!container) {
+    console.log('Container not found');
+    return;
+  }
+
+  console.log('Container found:', container);
 
   isVerticalMode = true;
 
+  // 修改容器为垂直布局
   container.style.display = "flex";
   container.style.flexDirection = "column";
   container.style.height = "100%";
   container.style.width = "100%";
   container.style.overflow = "hidden";
+  container.setAttribute('data-panel-group-direction', 'vertical');
 
-  const panels = container.querySelectorAll('#panel-ide, #panel-pdf');
-  panels.forEach(panel => {
-    panel.style.height = "50%";
-    panel.style.flex = "none";
-  });
+  // 查找编辑器和PDF面板 - 直接使用ID选择器
+  const editorPanel = document.getElementById('ide-redesign-editor-panel');
+  const pdfPanel = document.getElementById('ide-redesign-pdf-panel');
+  
+  console.log('Editor panel:', editorPanel);
+  console.log('PDF panel:', pdfPanel);
+
+  if (!editorPanel || !pdfPanel) {
+    console.error('无法找到编辑器或PDF面板');
+    console.log('Editor panel found:', !!editorPanel);
+    console.log('PDF panel found:', !!pdfPanel);
+    return;
+  }
+
+  // 设置编辑器面板样式
+  editorPanel.style.height = '50%';
+  editorPanel.style.width = '100%';
+  editorPanel.style.flex = '0 0 50%';
+  editorPanel.style.minHeight = '100px';
+  editorPanel.style.maxHeight = 'none';
+  editorPanel.style.overflow = 'auto';
+  editorPanel.style.position = 'relative';
+
+  // 设置PDF面板样式
+  pdfPanel.style.height = '50%';
+  pdfPanel.style.width = '100%';
+  pdfPanel.style.flex = '0 0 50%';
+  pdfPanel.style.minHeight = '100px';
+  pdfPanel.style.maxHeight = 'none';
+  pdfPanel.style.overflow = 'auto';
+  pdfPanel.style.position = 'relative';
 
   const separator = container.querySelector('[role="separator"]');
   if (separator) {
@@ -61,7 +99,7 @@ function setVerticalLayout() {
     setupResizer(newSeparator, container);
   }
 
-  const pdfPanel = document.querySelector('#panel-pdf');
+  // 强制重新渲染PDF面板
   if (pdfPanel) {
     window.dispatchEvent(new Event('resize'));
     setTimeout(() => {
@@ -73,18 +111,26 @@ function setVerticalLayout() {
 }
 
 function restoreHorizontalLayout() {
-  let container = document.querySelector('#panel-main > div[data-panel-group-id]');
+  let container = document.querySelector('#ide-redesign-editor-and-pdf-panel [data-panel-group][data-panel-group-direction="vertical"]');
+  if (!container) {
+    container = document.querySelector('div[data-panel-group][data-panel-group-id]');
+  }
   if (!container) return;
 
   isVerticalMode = false;
 
   container.style.flexDirection = "row";
+  container.setAttribute('data-panel-group-direction', 'horizontal');
 
-  const panels = container.querySelectorAll('#panel-ide, #panel-pdf');
-  panels.forEach(panel => {
-    panel.style.height = "";
-    panel.style.flex = "";
-  });
+  const editorPanel = document.getElementById('ide-redesign-editor-panel');
+  const pdfPanel = document.getElementById('ide-redesign-pdf-panel');
+  
+  if (editorPanel) {
+    editorPanel.style.cssText = "";
+  }
+  if (pdfPanel) {
+    pdfPanel.style.cssText = "";
+  }
 
   const separator = container.querySelector('[role="separator"]');
   if (separator) {
@@ -100,13 +146,13 @@ function restoreHorizontalLayout() {
     removeResizer(separator);
   }
 
-  const pdfPanel = document.querySelector('#panel-pdf');
-  if (pdfPanel) {
+  const pdfPanelForRefresh = document.getElementById('ide-redesign-pdf-panel');
+  if (pdfPanelForRefresh) {
     window.dispatchEvent(new Event('resize'));
     setTimeout(() => {
-      pdfPanel.style.display = 'none';
-      void pdfPanel.offsetHeight;
-      pdfPanel.style.display = '';
+      pdfPanelForRefresh.style.display = 'none';
+      void pdfPanelForRefresh.offsetHeight;
+      pdfPanelForRefresh.style.display = '';
     }, 150);
   }
 }
@@ -159,8 +205,8 @@ function handleResize(e) {
   e.stopImmediatePropagation();
 
   const containerRect = currentContainer.getBoundingClientRect();
-  const idePanel = currentContainer.querySelector('#panel-ide');
-  const pdfPanel = currentContainer.querySelector('#panel-pdf');
+  const idePanel = document.getElementById('ide-redesign-editor-panel');
+  const pdfPanel = document.getElementById('ide-redesign-pdf-panel');
 
   if (!idePanel || !pdfPanel) return;
 
@@ -204,7 +250,7 @@ function stopResize(e) {
   document.removeEventListener('mousemove', handleResize, true);
   document.removeEventListener('mouseup', stopResize, true);
 
-  const pdfPanel = document.querySelector('#panel-pdf');
+  const pdfPanel = document.getElementById('ide-redesign-pdf-panel');
   if (pdfPanel) {
     setTimeout(() => {
       pdfPanel.style.display = 'none';
